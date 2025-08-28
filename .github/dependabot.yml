@@ -1,6 +1,12 @@
 version: 2
 updates:
-  - package-ecosystem: "gitsubmodule" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
     schedule:
       interval: "daily"
+    target-branch: "main"
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "fork/attribute-async-catcher"
