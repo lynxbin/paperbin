@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    target-branch: "main"
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    target-branch: "fork/attribute-async-catcher"

@@ -2,12 +2,17 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-    id("io.papermc.paperweight.patcher") version "2.0.0-beta.18"
+    id("io.papermc.paperweight.patcher") version "2.0.0-beta.24"
 }
 
 paperweight {
     upstreams.paper {
-        ref = providers.gradleProperty("paperRef")
+        ref = providers.provider {
+            logger.info("Fetching paperref from submodule")
+            io.papermc.paperweight.util.Git(projectDir).exec(
+                providers, "submodule", "status", "paper-upstream"
+            ).get().substring(1, 41)
+        }
 
         patchFile {
             path = "paper-server/build.gradle.kts"
@@ -36,7 +41,7 @@ subprojects {
 
     extensions.configure<JavaPluginExtension> {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
+            languageVersion = JavaLanguageVersion.of(25)
         }
     }
 
@@ -51,7 +56,7 @@ subprojects {
     }
     tasks.withType<JavaCompile> {
         options.encoding = Charsets.UTF_8.name()
-        options.release = 21
+        options.release = 25
         options.isFork = true
     }
     tasks.withType<Javadoc> {
