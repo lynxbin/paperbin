@@ -7,7 +7,12 @@ plugins {
 
 paperweight {
     upstreams.paper {
-        ref = providers.gradleProperty("paperRef")
+        ref = providers.provider {
+            logger.info("Fetching paperref from submodule")
+            io.papermc.paperweight.util.Git(projectDir).exec(
+                providers, "submodule", "status", "paper-upstream"
+            ).get().substring(1, 41)
+        }
 
         patchFile {
             path = "paper-server/build.gradle.kts"

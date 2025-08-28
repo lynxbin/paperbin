@@ -1,0 +1,3 @@
+[submodule "paper-upstream"]
+	path = paper-upstream
+	url = git@github.com:papermc/paper
