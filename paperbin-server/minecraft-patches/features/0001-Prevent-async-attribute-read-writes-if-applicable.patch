@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Bjarne Koll <git@lynxplay.dev>
+Date: Fri, 29 Aug 2025 12:22:52 +0200
+Subject: [PATCH] Prevent async attribute read/writes if applicable
+
+Attribute modification or attribute reading for uninitialised attributes
+is unsafe off the main thread. Prevent marking changed attributes as
+dirty and log a warning for plugins performing this.
+
+diff --git a/net/minecraft/world/entity/ai/attributes/AttributeMap.java b/net/minecraft/world/entity/ai/attributes/AttributeMap.java
+index fdb02fc40579866167e8cc9bcefbd961588b53a6..45216b0f5b9ed7574c565dcefd63efb59e40db24 100644
+--- a/net/minecraft/world/entity/ai/attributes/AttributeMap.java
++++ b/net/minecraft/world/entity/ai/attributes/AttributeMap.java
+@@ -20,10 +20,18 @@ public class AttributeMap {
+     private final AttributeSupplier supplier;
+ 
+     public AttributeMap(AttributeSupplier supplier) {
++    // paperbin start - async read/write catches - track owner
++        this(supplier, null);
++    }
++    private java.lang.ref.WeakReference<net.minecraft.world.entity.Entity> mapOwner;
++    public AttributeMap(AttributeSupplier supplier, final @Nullable net.minecraft.world.entity.Entity entity) {
++        this.mapOwner = new java.lang.ref.WeakReference<>(entity);
++    // paperbin end - async read/write catches - track owner
+         this.supplier = supplier;
+     }
+ 
+     private void onAttributeModified(AttributeInstance instance) {
++        if (mapOwner.get() instanceof final net.minecraft.world.entity.Entity owner && owner.valid && org.spigotmc.AsyncCatcher.catchOpNonThrowing("async modifier mutation")) return; // paperbin start - async read/write catches
+         this.attributesToUpdate.add(instance);
+         if (instance.getAttribute().value().isClientSyncable()) {
+             this.attributesToSync.add(instance);
